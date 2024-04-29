@@ -1,0 +1,74 @@
+{
+  "name": "laravel-breeze-react",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Nilanth",
+  "keywords": [
+    "react",
+    "react-router",
+    "swr",
+    "tailwindcss",
+    "vercel",
+    "axios",
+    "react-hooks",
+    "laravel",
+    "sanctum",
+    "vite"
+  ],
+  "description": "Laravel Breeze is a cutting-edge React App template designed for Laravel Sanctum-based authentication, meticulously crafted using Vite.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nilanth/larave-breeze-react",
+    "directory": "/"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.5.2",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@headlessui/react": "^1.7.17",
+    "@material-tailwind/react": "^2.1.9",
+    "@tailwindcss/forms": "^0.5.6",
+    "@testing-library/jest-dom": "^5.16.2",
+    "@testing-library/react": "^12.1.4",
+    "@testing-library/user-event": "^13.5.0",
+    "@vitejs/plugin-react": "4.1.1",
+    "autoprefixer": "^10.4.16",
+    "axios": "^0.26.1",
+    "postcss": "^8.4.31",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.18.0",
+    "sass": "^1.69.5",
+    "swr": "^2.2.4",
+    "tailwindcss": "^3.3.5",
+    "vite": "4.5.0",
+    "web-vitals": "^2.1.4",
+    "yarn": "^1.22.22"
+  },
+  "scripts": {
+    "start": "vite --port 3000",
+    "build": "vite build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
