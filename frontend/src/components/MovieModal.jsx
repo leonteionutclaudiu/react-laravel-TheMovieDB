@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowUpRightFromSquare, faCalendarDays, faEarDeaf, faEarthAmericas, faHourglass, faIndustry, faStar, faStarHalfStroke } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,7 @@ const MovieModal = ({ movie, onClose }) => {
     const { showSpinner, setShowSpinner } = useContext(SpinnerContext);
     const [trailers, setTrailers] = useState([]);
     const [openIndex, setOpenIndex] = useState(null);
+    const modalRef = useRef(null);
 
     const apiKey = import.meta.env.VITE_API_KEY;
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -18,6 +19,12 @@ const MovieModal = ({ movie, onClose }) => {
 
     const toggleAccordion = (index) => {
         setOpenIndex((prevIndex) => (prevIndex === index ? null : index));
+    };
+
+    const handleCloseModal = (e) => {
+        if (!modalRef.current.contains(e.target)) {
+            onClose();
+        }
     };
 
     useEffect(() => {
@@ -43,9 +50,16 @@ const MovieModal = ({ movie, onClose }) => {
         fetchMovieDetails();
     }, [movie.id]);
 
+    useEffect(() => {
+        document.addEventListener('mousedown', handleCloseModal);
+
+        return () => {
+            document.removeEventListener('mousedown', handleCloseModal);
+        };
+    }, []);
 
     return <>
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 backdrop-blur-md container max-w-7xl overflow-y-auto mx-auto p-4 mt-[65px]">
+        <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-md container max-w-7xl overflow-y-auto mx-auto p-4 mt-[65px]" ref={modalRef}>
             <button className="z-10 sticky top-0 shadow-2xl w-20 ml-auto bg-red-500 h-10 block text-xl text-white hover:bg-red-700 transition rounded-full" onClick={onClose}>Back <FontAwesomeIcon icon={faArrowLeft} /></button>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} className="w-full md:max-w-md h-auto mb-4 rounded-lg" />
@@ -57,7 +71,7 @@ const MovieModal = ({ movie, onClose }) => {
                             <FontAwesomeIcon icon={faCalendarDays} /> {formatDate(movie.release_date)} <span className='text-tertiary'>({movie.status.toLowerCase()})</span>
                         </p>
                         <p className="text-secondary">
-                            <FontAwesomeIcon icon={faHourglass} /> {movie.runtime} minutes
+                            <FontAwesomeIcon icon={faHourglass} /> {movie.runtime > 0 ? `${movie.runtime} minutes` : 'not specified'}
                         </p>
                         <p className="text-yellow-500">
                             {movie.vote_average > 7.5 ? <FontAwesomeIcon icon={faStar} /> : <FontAwesomeIcon icon={faStarHalfStroke} />} Rating: {parseFloat(movie.vote_average.toFixed(1))}

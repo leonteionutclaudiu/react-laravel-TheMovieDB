@@ -8,7 +8,6 @@ import Home from 'pages/home';
 import ForgotPassword from 'pages/forgot-password';
 import PasswordReset from 'pages/password-reset';
 import NotFoundPage from 'pages/404';
-import MovieDetails from 'components/MovieDetails';
 import AppLayout from 'components/Layouts/AppLayout';
 import GuestLayout from 'components/Layouts/GuestLayout';
 import { useAuth } from 'hooks/auth';
@@ -29,14 +28,14 @@ function App() {
         <div className="antialiased">
           {user ? <AppLayout>
             <Routes>
-            <Route path="/" element={<Home />}/>
-                <Route path="/search" element={<MovieList />}/> 
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<MovieList />} />
+              <Route path="/genre/:genreId" element={<MovieList />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/password-reset/:token" element={<PasswordReset />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/movie/:id" element={<MovieDetails />} />
               <Route path="*" element={<NotFoundPage />}
               />
             </Routes>
@@ -45,12 +44,12 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<MovieList />} />
+                <Route path="/genre/:genreId" element={<MovieList />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/password-reset/:token" element={<PasswordReset />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/movie/:id" element={<MovieDetails />} />
                 <Route path="*" element={<NotFoundPage />}
                 />
               </Routes>

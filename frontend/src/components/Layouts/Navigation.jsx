@@ -3,16 +3,37 @@ import Dropdown from 'components/Dropdown'
 import ResponsiveNavLink, { ResponsiveNavButton } from 'components/ResponsiveNavLink'
 import { DropdownButton } from 'components/DropdownLink'
 import { useAuth } from 'hooks/auth'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import CustomNavLink from 'components/NavLink';
 import { Link, NavLink } from 'react-router-dom';
 import { faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import SearchBar from 'components/SearchBar'
+import { getMovieGenres } from '../../utils/getMovieGenres'
+import { SpinnerContext } from '../../contexts/SpinnerContext'
 
 const Navigation = ({ user }) => {
-  const { logout } = useAuth()
-  const [open, setOpen] = useState(false)
+
+  const apiKey = import.meta.env.VITE_API_KEY;
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  const { logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [genres, setGenres] = useState([]);
+  const { showSpinner, setShowSpinner } = useContext(SpinnerContext);
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const fetchedGenres = await getMovieGenres(apiKey, apiUrl, setShowSpinner);
+        setGenres(fetchedGenres);
+      } catch (error) {
+        console.error('Error fetching genres:', error);
+      }
+    };
+
+    fetchGenres();
+  }, []);
 
   return (
     <nav className="bg-white border-b border-gray-100 shadow-tertiary shadow-md z-10 fixed top-0 left-0 right-0">
@@ -27,16 +48,29 @@ const Navigation = ({ user }) => {
               </Link>
             </div>
             {/* Navigation Links */}
-            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+            <div className="hidden space-x-8 sm:-my-px sm:flex">
               {user && <CustomNavLink
                 to="/dashboard"
               >
                 Dashboard
               </CustomNavLink>}
-              <div className="hidden md:flex md:items-center md:ml-6">
-              <SearchBar />
             </div>
-            </div>
+          </div>
+          <div className="hidden sm:flex gap-6 sm:items-center md:ml-6">
+            <SearchBar />
+            <Dropdown align="right"
+              width="48"
+              trigger={
+                <button className="flex items-center text-sm font-medium
+                 text-gray-500 hover:text-gray-700 focus:outline-none
+                 transition duration-150 ease-in-out">
+                  <p className='text-2xl text-primary hover:text-underline transition'>Genres</p>
+                </button>
+              }>
+              {genres.map(genre => (
+                <Link key={genre.id} to={`/genre/${genre.id}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">{genre.name}</Link>
+              ))}
+            </Dropdown>
           </div>
           {/* Settings Dropdown */}
           <div className="hidden sm:flex sm:items-center sm:ml-6">
@@ -47,7 +81,7 @@ const Navigation = ({ user }) => {
                 <button className="flex items-center text-sm font-medium
                  text-gray-500 hover:text-gray-700 focus:outline-none
                  transition duration-150 ease-in-out">
-                  <div>{user ? user.name : <FontAwesomeIcon icon={faRightToBracket} className='text-xl' />}</div>
+                  <div>{user ? user.name : <FontAwesomeIcon icon={faRightToBracket} className='text-2xl text-primary hover:text-gray-800 transition' />}</div>
                   {user && <div className="ml-1">
                     <svg
                       className="fill-current h-4 w-4"
@@ -116,30 +150,31 @@ const Navigation = ({ user }) => {
       {/* Responsive Navigation Menu */}
       {open && (
         <div className="block sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
+          {user && <div className="pt-2 pb-3 space-y-1 w-fit mx-auto">
             <ResponsiveNavLink
               to="/dashboard"
             >
               Dashboard
             </ResponsiveNavLink>
-          </div>
+          </div>}
           {/* Responsive Settings Options */}
           <div className="pt-4 pb-1 border-t border-gray-200">
-            <div className="flex items-center px-4">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-10 w-10 fill-current text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+            <div className="flex items-center px-4 flex-col gap-4">
+              <div className="sm:hidden flex flex-col gap-6 mx-auto justify-center items-center md:ml-6">
+                <SearchBar />
+                <Dropdown align="right"
+                  width="48"
+                  trigger={
+                    <button className="flex items-center text-sm font-medium
+                 text-gray-500 hover:text-gray-700 focus:outline-none
+                 transition duration-150 ease-in-out">
+                      <p className='text-2xl text-primary hover:text-underline transition'>Genres</p>
+                    </button>
+                  }>
+                  {genres.map(genre => (
+                    <Link key={genre.id} to={`/genre/${genre.id}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">{genre.name}</Link>
+                  ))}
+                </Dropdown>
               </div>
               <div className="ml-3">
                 <div className="font-medium text-base text-gray-800">
@@ -150,11 +185,18 @@ const Navigation = ({ user }) => {
                 </div>
               </div>
             </div>
-            <div className="mt-3 space-y-1">
+            <div className="mt-3 space-y-1 w-fit mx-auto">
               {/* Authentication */}
-              <ResponsiveNavButton onClick={logout}>
+              {user ? <ResponsiveNavButton onClick={logout}>
                 Logout
-              </ResponsiveNavButton>
+              </ResponsiveNavButton> : <div className='flex flex-col w-fit mx-auto mt-6 items-center justify-center gap-4'>
+                <NavLink to='/login' className={({ isActive }) =>
+                  isActive ? 'font-bold w-full text-left block px-4 py-2 text-lg leading-5 text-gray-700 focus:outline-none transition duration-150 ease-in-out' : 'w-full text-left block px-4 py-2 text-lg leading-5 text-gray-700 focus:outline-none transition duration-150 ease-in-out'
+                }>Login</NavLink>
+                <NavLink to='/register' className={({ isActive }) =>
+                  isActive ? 'font-bold w-full text-left block px-4 py-2 text-lg leading-5 text-gray-700 focus:outline-none transition duration-150 ease-in-out' : 'w-full text-left block px-4 py-2 text-lg leading-5 text-gray-700 focus:outline-none transition duration-150 ease-in-out'
+                }>Register</NavLink>
+              </div>}
             </div>
           </div>
         </div>

@@ -2,13 +2,16 @@ import React, { useEffect, useState, useRef, useContext } from 'react';
 import axios from 'axios';
 import MovieListComponent from './MovieListComponent';
 import { SpinnerContext } from '../contexts/SpinnerContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import MovieModal from './MovieModal';
+import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const MovieList = () => {
+    const { genreId } = useParams();
     const [movies, setMovies] = useState([]);
     const [page, setPage] = useState(1);
     const endOfListRef = useRef(null);
@@ -17,7 +20,8 @@ const MovieList = () => {
     const location = useLocation();
     const [lastSearchTerm, setLastSearchTerm] = useState('');
     const [selectedMovie, setSelectedMovie] = useState(null);
-    const [totalResults,setTotalResults] = useState('');
+    const [totalResults, setTotalResults] = useState('');
+    const [genreName, setGenreName] = useState('');
 
 
     const openModal = async (movie) => {
@@ -46,6 +50,12 @@ const MovieList = () => {
     };
 
     useEffect(() => {
+        setShowSpinner(true);
+        setMovies([]);
+        setPage(1);
+    }, [genreId]);
+
+    useEffect(() => {
         const fetchMovies = async () => {
             setShowSpinner(true);
             try {
@@ -64,7 +74,26 @@ const MovieList = () => {
                             page: page,
                         },
                     });
-                    setTotalResults(response.data.total_results);
+                } else if (genreId) {
+
+                    const genresResponse = await axios.get(`${apiUrl}/genre/movie/list`, {
+                        params: {
+                            api_key: apiKey,
+                            language: 'en-US',
+                        },
+                    });
+                    const genre = genresResponse.data.genres.find(genre => genre.id === parseInt(genreId));
+                    if (genre) {
+                        setGenreName(genre.name);
+                    }
+
+                    response = await axios.get(`${apiUrl}/discover/movie`, {
+                        params: {
+                            api_key: apiKey,
+                            with_genres: genreId,
+                            page: page,
+                        },
+                    });
                 } else {
                     response = await axios.get(`${apiUrl}/movie/popular`, {
                         params: {
@@ -74,6 +103,7 @@ const MovieList = () => {
                     });
                 }
 
+                setTotalResults(response.data.total_results);
                 setMovies(prevMovies => {
                     if (searchParam !== lastSearchTerm) {
                         return [...response.data.results];
@@ -91,8 +121,7 @@ const MovieList = () => {
         };
 
         fetchMovies();
-    }, [location.search, page]);
-
+    }, [location.search, genreId, page]);
 
     const handleScroll = () => {
         if (
@@ -102,11 +131,11 @@ const MovieList = () => {
             isScrollActive
         ) {
             setPage(prevPage => prevPage + 1);
-            setIsScrollActive(false);
+            // setIsScrollActive(false);
 
-            setTimeout(() => {
-                setIsScrollActive(true);
-            }, 1000);
+            // setTimeout(() => {
+            //     setIsScrollActive(true);
+            // }, 1000);
         }
     };
 
@@ -121,7 +150,9 @@ const MovieList = () => {
         <>
             {movies && (
                 <div>
-                    <h2 className='text-center text-primary font-bold text-2xl md:text-3xl mb-10'>{getSearchParamFromUrl() ? `Search results (${totalResults}) :` : 'Popular movies'}</h2>
+                    <h2 className='text-center text-primary font-bold text-2xl md:text-3xl mb-10'>                {genreId ? `Genre: ${genreName}` : getSearchParamFromUrl() ? `Search results (${totalResults}) :` : 'Popular movies'}
+                    </h2>
+                    {totalResults < 1 && <h2 className='text-black text-2xl text-center'>Sorry, no results found ! <FontAwesomeIcon icon={faFaceFrown} /></h2>}
                     <div className='grid gap-2 md:gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 items-stretch'>
                         {movies.map((movie, index) => (
                             <React.Fragment key={index}>
